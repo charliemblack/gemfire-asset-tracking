@@ -1,0 +1,11 @@
+*~
+.DS_Store
+.gradle
+build/
+!gradle-wrapper.jar
+.gradletasknamecache
+*.iml
+*.ipr
+*.iws
+
+

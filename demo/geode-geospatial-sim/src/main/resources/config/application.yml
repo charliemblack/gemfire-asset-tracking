@@ -1,0 +1,35 @@
+spring:
+  profiles.active: dev
+---
+spring:
+ # everything that follows belongs to the devel environment
+  profiles: dev
+  name: development
+
+numberOfActors: 20000
+numberOfSimulators: 6
+newActorTimeout: 1
+
+demo:
+  locators: localhost[10334]
+---
+spring:
+ # everything that follows belongs to the prod environment
+ profiles: prod
+ name: production
+
+numberOfActors: 1000000
+numberOfSimulators: 16
+
+demo:
+  locators: localhost[10334]
+
+
+---
+spring:
+  # everything that follows belongs to the unit-test environment
+  profiles: unit-test
+  name: unit test name
+
+demo:
+  locators: localhost[10334]

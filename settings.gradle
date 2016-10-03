@@ -1,0 +1,2 @@
+rootProject.name='geode-geospatial-index'
+include 'geode-geospatial-api','geode-geospatial-lib','demo:geode-geospatial-demo-lib', 'demo:geode-geospatial-grid','demo:geode-geospatial-sim','demo:geode-geospatial-web'

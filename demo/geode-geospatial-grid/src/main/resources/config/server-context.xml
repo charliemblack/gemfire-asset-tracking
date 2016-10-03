@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:gfe="http://www.springframework.org/schema/gemfire"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/gemfire http://www.springframework.org/schema/gemfire/spring-gemfire.xsd">
+
+    <bean id="yamlProperties" class="org.springframework.beans.factory.config.YamlPropertiesFactoryBean">
+        <property name="resources" value="classpath:config/application.yml"/>
+    </bean>
+
+    <bean id="mySecondConfigurer"
+          class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer"
+          p:properties-ref="yamlProperties"/>
+
+    <import resource="classpath:/config/common-context.xml"/>
+
+    <bean id="geodeGeometryFactory" class="org.apache.geode.geospatial.domain.PdxLocationEventGeometryFactory">
+        <property name="geometryFactory" ref="geometryFactory"/>
+    </bean>
+
+    <bean id="gemfireProperties"
+          class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="properties">
+            <props>
+                <prop key="locators">${demo.locators:localhost[10334]}</prop>
+                <prop key="start-locator">${demo.startLocator:false}</prop>
+                <prop key="mcast-port">0</prop>
+                <prop key="jmx-manager">${demo.jmx-manager:false}</prop>
+                <prop key="jmx-manager-start">${demo.jmx-manager-start:false}</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="geospaitalIndex" class="org.apache.geode.geospatial.index.BasicQuadTreeImpl">
+        <property name="geodeGeometryFactory" ref="geodeGeometryFactory"/>
+    </bean>
+
+    <gfe:disk-store id="pdxDiskStore"/>
+    <gfe:disk-store id="geoSpatialDiskStore"/>
+
+    <gfe:cache pdx-disk-store="pdxDiskStore"
+               pdx-read-serialized="true"
+               pdx-persistent="true"
+               critical-heap-percentage="75"
+               eviction-heap-percentage="70" properties-ref="gemfireProperties"/>
+    <gfe:partitioned-region id="geoSpatialRegion"
+                            data-policy="PERSISTENT_PARTITION">
+        <gfe:cache-writer>
+            <bean class="org.apache.geode.geospatial.grid.IndexMaintanance">
+                <property name="geospaitalIndex" ref="geospaitalIndex"/>
+            </bean>
+        </gfe:cache-writer>
+        <gfe:partition-listener>
+            <bean class="org.apache.geode.geospatial.grid.IndexHAMaintenance">
+                <property name="geospaitalIndex" ref="geospaitalIndex"/>
+            </bean>
+        </gfe:partition-listener>
+    </gfe:partitioned-region>
+    <gfe:function-service>
+        <gfe:function>
+            <bean class="org.apache.geode.geospatial.function.GeoQueryFunction">
+                <property name="geospaitalIndex" ref="geospaitalIndex"/>
+                <property name="chunkSize" value="1000"/>
+                <property name="region" ref="geoSpatialRegion"/>
+            </bean>
+            <bean class="org.apache.geode.geospatial.function.ClearRegion"/>
+        </gfe:function>
+    </gfe:function-service>
+    <gfe:cache-server port="0"/>
+
+</beans>

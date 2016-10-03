@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:gfe="http://www.springframework.org/schema/gemfire"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/gemfire http://www.springframework.org/schema/gemfire/spring-gemfire.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+    <bean id="yamlProperties" class="org.springframework.beans.factory.config.YamlPropertiesFactoryBean">
+        <property name="resources" value="classpath:config/application.yml"/>
+    </bean>
+
+    <context:property-placeholder properties-ref="yamlProperties"/>
+
+    <import resource="classpath:/config/common-context.xml"/>
+
+    <gfe:pool locators="${demo.locators:localhost[10334]}"
+              pr-single-hop-enabled="true" max-connections="-1"/>
+    <gfe:client-cache/>
+
+    <gfe:client-region id="geoSpatialRegion" shortcut="PROXY"/>
+
+    <bean name="roads" class="org.apache.geode.geospatial.client.Roads">
+        <constructor-arg ref="geometryFactory"/>
+        <property name="roads" value="${roadsFile:data/Trknet2011.kmz}"/>
+    </bean>
+
+    <bean name="actorController" class="org.apache.geode.geospatial.client.ActorController">
+        <property name="numberOfActors" value="${numberOfActors:1000000}"/>
+        <property name="numberOfSimulators" value="${numberOfSimulators:6}"/>
+        <property name="roads" ref="roads"/>
+        <property name="newActorTimeout" value="${newActorTimeout:10}"/>
+        <property name="geoRegion">
+            <bean name="streamingMap" class="org.apache.geode.geospatial.utils.CachingPutAllMap">
+                <property name="callerSends" value="false"/>
+                <property name="batchSize" value="${batchSize:100}"/>
+                <property name="timeout" value="${timeout:100}"/>
+                <property name="executor" ref="commonExecutor"/>
+                <property name="scheduler" ref="commmonScheduler"/>
+                <property name="wrappedMap" ref="geoSpatialRegion"/>
+            </bean>
+        </property>
+    </bean>
+
+    <!-- Somewhat sketchy but effective - why code when I can configure -->
+    <bean id="applicationThread" class="java.lang.Thread" init-method="start" destroy-method="interrupt">
+        <constructor-arg ref="actorController"/>
+        <property name="name" value="GeoClient-Application-Thread"/>
+        <property name="daemon" value="false"/>
+    </bean>
+</beans>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Geode Geo Spatial</title>
+    <link rel="stylesheet" href="js/ol-v3.18.2-dist/ol.css" type="text/css">
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="js/ol-v3.18.2-dist/ol.js"></script>
+    <script src="js/jquery-3.1.1.min.js"></script>
+    <style>
+        .ol-dragbox {
+            background-color: rgba(255, 255, 255, 0.4);
+            border-color: rgba(100, 150, 0, 1);
+        }
+        html, body, #map {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #text {
+            position: absolute;
+            bottom: 1em;
+            left: 1em;
+            width: 512px;
+            z-index: 20000;
+            background-color: white;
+            padding: 0 0.5em 0.5em 0.5em;
+        }
+    </style>
+</head>
+<body>
+<div id="map" class="map"></div>
+</body>
+<script>
+
+    var vectorSource = new ol.source.Vector({
+    });
+    var style = new ol.style.Style({
+        image: new ol.style.Circle({
+            radius: 5,
+            fill: new ol.style.Fill({color: 'black'}),
+            stroke: new ol.style.Stroke({color: 'orange', width: 2})
+        })
+    });
+    var vectorLayer = new ol.layer.Vector({
+        source: vectorSource,
+        style: style
+    });
+
+    var map = new ol.Map({
+        layers: [
+            new ol.layer.Tile({
+                source: new ol.source.OSM()
+            }),
+            vectorLayer
+        ],
+        renderer: 'webgl',
+        target: 'map',
+        view: new ol.View({
+            center: [0, 0],
+            zoom: 2
+        })
+    });
+
+    // a DragBox interaction used to select features by drawing boxes
+    var dragBox = new ol.interaction.DragBox({
+        condition: ol.events.condition.platformModifierKeyOnly
+    });
+    map.addInteraction(dragBox);
+
+    //I like having the map resume where I left it...
+    if(localStorage.center){
+        map.getView().setCenter(JSON.parse(localStorage.center));
+    }
+    if(localStorage.resolution){
+        map.getView().setResolution(JSON.parse(localStorage.resolution));
+    }
+
+    map.getView().on('propertychange', function(e) {
+        switch (e.key) {
+            case 'center':
+                localStorage.center = JSON.stringify(map.getView().getCenter());
+                break;
+            case 'resolution':
+                localStorage.resolution = JSON.stringify(map.getView().getResolution());
+        }
+    });
+
+    dragBox.on('boxend', function () {
+        // features that intersect the box are added to the collection of
+        // selected features, and their names are displayed in the "info"
+        // div
+        var info = [];
+        var extent = dragBox.getGeometry().getExtent();
+        var bottomLeft = ol.proj.transform([extent[0], extent[1]], map.getView().getProjection(), 'EPSG:4326');
+        var topRight = ol.proj.transform([extent[2], extent[3]], map.getView().getProjection(), 'EPSG:4326');
+
+        var settings = {
+            "async": true,
+            "url": "query?wktPolygon=POLYGON((" + bottomLeft[0] + "%20" + bottomLeft[1] + "%2C" +
+            bottomLeft[0] + "%20" + topRight[1] + "%2C" +
+            topRight[0] + "%20" + topRight[1] + "%2C" +
+            topRight[0] + "%20" + bottomLeft[1] + "%2C" +
+            bottomLeft[0] + "%20" + bottomLeft[1] +
+            "))",
+            "method": "GET",
+            "headers": {
+                "cache-control": "no-cache",
+            }
+        };
+        $.ajax(settings).done(function (response) {
+            var responseLength = response.length;
+            var allFeatures = [];
+            var mapProjection =  map.getView().getProjection();
+            for(var i = 0; i < responseLength; i++){
+                var currItem = response[i];
+                var curr = new ol.Feature({
+                    geometry: new ol.geom.Point(ol.proj.transform([currItem.lng, currItem.lat],  'EPSG:4326', mapProjection)),
+                    id: currItem.uid
+                });
+                allFeatures.push(curr);
+            }
+            var newSource = new ol.source.Vector({
+                features: allFeatures
+            });
+            vectorLayer.setSource(newSource);
+            vectorSource.clear();
+            vectorSource = newSource;
+        });
+    });
+</script>
+
+</html>

@@ -1,0 +1,160 @@
+ext {
+    version = '1.0.0.SNAPSHOT'
+    assertjVersion = '2.4.1'
+    geodeVersion = '1.0.0-incubating.M3'
+    googleGuavaVersion = '19.0'
+    junitVersion = '4.12'
+    slf4jVersion = '1.7.21'
+    springBootVersion = '1.4.1.RELEASE'
+    springCoreVersion = '4.3.1.RELEASE'
+    springDataGeodeVersion = '1.0.0.APACHE-GEODE-INCUBATING-M3-SNAPSHOT'
+    springDataGemFireVersion = '1.9.0.BUILD-SNAPSHOT'
+    springShellVersion = '1.1.0.RELEASE'
+    jettyVersion = '9.3.6.v20151106'
+    jtsVersion = '1.13'
+    eclipseCollectionsVersion = '7.1.0'
+    geoToolsVersion = '14.3'
+    codaMetricsVersion = '3.1.0'
+    log4jVersion = '2.6.1'
+    logbackVersion = '1.1.7'
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:1.4.1.RELEASE"
+    }
+}
+description = 'Geode Geospatial Indexd'
+
+
+
+allprojects {
+    apply plugin: "idea"
+}
+subprojects {
+    if (name == 'demo') {
+        return
+    }
+    apply plugin: 'java'
+    group = 'org.apache.geode.demo'
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    repositories {
+        maven { url "file:${rootDir}/localMavenRepo" }
+        maven { url 'http://download.osgeo.org/webdav/geotools' }
+        maven { url 'https://repo.spring.io/libs-release' }
+        maven { url 'https://repo.spring.io/libs-milestone' }
+        maven { url 'https://repo.spring.io/libs-snapshot' }
+
+        mavenCentral()
+    }
+    dependencies {
+        compile "org.apache.geode:geode-core:$geodeVersion"
+        compile "org.apache.geode:gfsh-dependencies:$geodeVersion"
+        compile "org.slf4j:slf4j-api:$slf4jVersion"
+        compile "org.apache.logging.log4j:log4j-api:$log4jVersion"
+        compile "org.apache.logging.log4j:log4j-core:$log4jVersion"
+        compile "ch.qos.logback:logback-classic:$logbackVersion"
+    }
+}
+
+project(':geode-geospatial-api') {
+    description = 'This is where the api goes'
+    dependencies {
+        compile("com.vividsolutions:jts:$jtsVersion")
+    }
+
+}
+project(':geode-geospatial-lib') {
+    description = 'This is where any client libs goes - shared code between grid and client'
+    dependencies {
+        compile project(':geode-geospatial-api')
+        compile("org.springframework:spring-context:$springCoreVersion")
+        compile("org.eclipse.collections:eclipse-collections-api:$eclipseCollectionsVersion")
+        compile("org.eclipse.collections:eclipse-collections:$eclipseCollectionsVersion")
+        compile("io.dropwizard.metrics:metrics-core:$codaMetricsVersion")
+    }
+}
+project(':demo:geode-geospatial-demo-lib') {
+    description = 'This is where the client app goes'
+    dependencies {
+        compile project(':geode-geospatial-lib')
+
+        compile("org.springframework.boot:spring-boot-starter:$springBootVersion") {
+            exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+        }
+        compile("com.google.guava:guava:$googleGuavaVersion")
+        compile("org.geotools.xsd:gt-xsd-kml:$geoToolsVersion")
+        compile("org.geotools:gt-epsg-wkt:$geoToolsVersion")
+        compile("org.geotools:gt-jts-wrapper:$geoToolsVersion")
+        testCompile("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
+        compile("org.springframework.boot:spring-boot-configuration-processor:$springBootVersion")
+    }
+}
+
+project(':demo:geode-geospatial-grid') {
+    description = 'This is where the grid app goes'
+    apply plugin: 'spring-boot'
+    dependencies {
+        compile "org.eclipse.jetty:jetty-server:$jettyVersion"
+        compile "org.eclipse.jetty:jetty-webapp:$jettyVersion"
+        compile "org.eclipse.jetty:jetty-http:$jettyVersion"
+        compile "org.eclipse.jetty:jetty-io:$jettyVersion"
+        compile "org.eclipse.jetty:jetty-servlet:$jettyVersion"
+
+        compile("org.springframework.boot:spring-boot-starter:$springBootVersion") {
+            exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+            exclude group: 'org.eclipse.jetty', module: '*'
+        }
+        compile "org.springframework.shell:spring-shell:$springShellVersion"
+        compile "org.springframework.data:spring-data-geode:$springDataGeodeVersion"
+        compile project(':demo:geode-geospatial-demo-lib')
+        compile project(':geode-geospatial-lib')
+        compile "com.vividsolutions:jts:$jtsVersion"
+        testCompile("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
+        compile("org.springframework.boot:spring-boot-configuration-processor:$springBootVersion")
+    }
+    bootRun.workingDir = new File(buildDir.absolutePath + '/bootRun')
+    bootRun.workingDir.mkdirs()
+}
+project(':demo:geode-geospatial-sim') {
+    description = 'This is where the client app goes'
+    apply plugin: 'spring-boot'
+    dependencies {
+        compile project(':demo:geode-geospatial-demo-lib')
+
+        compile("org.springframework.boot:spring-boot-starter:$springBootVersion") {
+            exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+        }
+        compile "org.springframework.data:spring-data-geode:$springDataGeodeVersion"
+        compile("org.geotools.xsd:gt-xsd-kml:$geoToolsVersion")
+        compile("org.geotools:gt-epsg-wkt:$geoToolsVersion")
+        compile("org.geotools:gt-jts-wrapper:$geoToolsVersion")
+        testCompile("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
+        compile("org.springframework.boot:spring-boot-configuration-processor:$springBootVersion")
+    }
+}
+project(':demo:geode-geospatial-web') {
+    description = 'This is where the web app goes'
+    apply plugin: 'spring-boot'
+    dependencies {
+        compile project(':demo:geode-geospatial-grid')
+        compile project(':demo:geode-geospatial-demo-lib')
+
+
+        compile("org.springframework.boot:spring-boot-starter:$springBootVersion") {
+            exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+        }
+        compile "org.springframework.boot:spring-boot:$springBootVersion"
+        compile "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
+        compile "org.springframework.data:spring-data-geode:$springDataGeodeVersion"
+        testCompile("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
+        compile("org.springframework.boot:spring-boot-configuration-processor:$springBootVersion")
+    }
+}
+
+
+

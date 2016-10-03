@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+
+
+    <bean id="commmonScheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler">
+        <property name="daemon" value="true"/>
+        <property name="threadGroupName" value="CommonScheduler"/>
+        <property name="poolSize" value="${commmonSchedulerPoolSize:3}"/>
+        <property name="waitForTasksToCompleteOnShutdown" value="false"/>
+    </bean>
+
+    <task:executor id="commonExecutor"
+                   pool-size="${commonExecutorThreads:16}"
+                   queue-capacity="${commonExecutorBacklog:256}"
+                   rejection-policy="CALLER_RUNS"/>
+
+    <bean id="conversionService"
+          class="org.springframework.context.support.ConversionServiceFactoryBean">
+        <property name="converters">
+            <list>
+                <bean class="org.apache.geode.geospatial.spring.MapToMap"/>
+                <bean class="org.apache.geode.geospatial.spring.MapToRegion"/>
+                <bean class="org.apache.geode.geospatial.spring.RegionToRegion"/>
+                <bean class="org.apache.geode.geospatial.spring.RegionToMap"/>
+                <bean class="org.apache.geode.geospatial.spring.RegionToConcurrentMap"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean name="geometryFactory" class="com.vividsolutions.jts.geom.GeometryFactory"/>
+
+</beans>
