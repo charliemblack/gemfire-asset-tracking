@@ -31,6 +31,7 @@ From a performance perspective a Quad Tree is a O(log n) data structure like all
 ### Some Technical Information
 
 In this example we will be using some features of Geode:
+
 1. **PartitionListener** – The partition listener is make sure the index is HA.   When there is a failure detected the
 PartitionListener will create the index on the primary node(s).
 2. **CacheWriter** – As data is being inserted and removed from the system we have to update the index.
@@ -38,6 +39,7 @@ PartitionListener will create the index on the primary node(s).
 the search.
 
 In this project I have also made heavy use of Spring eco system.
+
 1. **Spring Data Geode** - Spring Data Geode is part of the Spring Data project.   I use this project configure Geode
 and use dependency injection to wire up the project.   I used spring xml DSL to configure the project because I wanted
 all the config in one place - just personal preference to help someone with learning.
@@ -45,6 +47,7 @@ all the config in one place - just personal preference to help someone with lear
 application a breeze.
 
 The Quad Tree Implementation details in this project
+
 1. Geometries that wrap the poles (-90/90) and the -180/180 lines are not handled correctly.   This was done to simplify
 the code.   If this is a concern then we can just split the data in the index and insert multiple geometries.
 2. To make remove fast there is an extra data structure to facilitate a quick remove by key.   This fast remove feature
@@ -138,6 +141,7 @@ object pointers.
 ### Common JVM settings for production
 
 When going into a production some of the common Java Parameters I like to use are:
+
 * **-XX:+UseParNewGC** - Use multi-threaded young generation collection
 * **-XX:+UseConcMarkSweepGC**  - The CMS GC is the recommend GC for server applications - G1 is getting better with
 every release so it debatable for production uses.
@@ -151,10 +155,12 @@ and only use the `CMSInitiatingOccupancyFraction`.
 
 Just about every application is different with respect to how it uses the young generation space.   So it is common to
 tune the young generation space.
+
 * **-Xmn=2g** - Another place to look at when tuning the system this is something to review the GC logs and see how the
 application is using memory and tune respectively.
 
 When reviewing GC issues here is something to cut and past to help working with GC tuning:
+
 * **export logtime=\`date +%Y%m%d%H%M%S\`** - Grab a date so we can have a history of GC logs based on application start time.
 * **-Xloggc:gc${logtime}.log** - Name the log file with the current date.
 * **-XX:+PrintGCDetails** - Turn on detailed GC logging.
@@ -164,16 +170,19 @@ Then use something GCViewer to see how the memory is doing:
     https://github.com/chewiebug/GCViewer
 
 Sometimes it is good to review the total time the application stops.   That option can be turned on via:
+
 * **-XX:+PrintGCApplicationStoppedTime** – this will actually report pause time for all safepoints (GC related or not).
 
 Unfortunately output from this option lacks timestamps, but it is still useful to narrow down problem to safepoints.
 
 If you are working with larger heaps here is an option to try out:
+
 * **-XX:+UnlockDiagnosticVMOptions**
 * **-XX:ParGCCardsPerStrideChunk=32768** - The default is 256 and could be to small for large heaps.
 
- In one case ParGCCardsPerStrideChunk option reduced the duration of minor GC by more than 60% in tests with 32G and 96G
- heaps:
+In one case ParGCCardsPerStrideChunk option reduced the duration of minor GC by more than 60% in tests with 32G and 96G
+heaps:
+
  * 96G (5G young gen): minor pauses reduced from ~130ms to ~40ms while   the frequency remained the same ( once every
  ~45s)
  * 32G (2G young gen): ~35ms down to ~13ms (same frequency, once every 20s)
