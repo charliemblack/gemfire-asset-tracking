@@ -158,7 +158,7 @@ and only use the `CMSInitiatingOccupancyFraction`.
 Just about every application is different with respect to how it uses the young generation space.   So it is common to
 tune the young generation space.
 
-* **-Xmn=2g** - Another place to look at when tuning the system this is something to review the GC logs and see how the
+* **-Xmn2g** - Another place to look at when tuning the system this is something to review the GC logs and see how the
 application is using memory and tune respectively.
 
 When reviewing GC issues here is something to cut and past to help working with GC tuning:
