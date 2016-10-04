@@ -9,7 +9,7 @@ children - quad means four.  How this index applies to geo spatial, when divide 
 partitions.  Each node in the quad tree is then responsible for holding the data that is contained in the individual
 Quad.
 
-Basic like this:
+Basic conceptual view looks like this:
 
 ```
  0 | 1
