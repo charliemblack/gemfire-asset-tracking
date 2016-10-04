@@ -84,6 +84,8 @@ Then Use **Ctrl+Drag** (**Command+Drag** on Mac) to draw boxes over the state of
 for how fast or slow your browser is make smaller boxes.   I did no limiting of results to make the code simpler to
 read.
 
+![Example Query](/images/sample_query.png)
+
 The sample data set used in the demo was derived from: http://www.dot.ca.gov/hq/tsip/gis/datalibrary/Metadata/Trknet.html
 
 I converted the Truck Network Shapefile to KMZ file so I could use it with some Java tools that can read KML files.
