@@ -2,13 +2,14 @@
 
 This project demonstrates the ability to add third party indexing on top of Apache Geode.  Third party indexing extends
 the capabilities of Geode to quickly retrieve data that can't be looked up through standard key-value techniques or
-through Geode Object Query Language (OQL).
+through Geode's Object Query Language (OQL).
 
-The indexing technique that is used in this project is a basic Quad Tree.  A Quad Tree is a basic tree data structure
-which has four children - quad means four.
+The indexing technique that is used in this project is a Quad Tree.  A Quad Tree is a tree data structure which has four
+children - quad means four.  How this index applies to geo spatial, when divide a 2 dimensional space in four equal
+partitions.  Each node in the quad tree is then responsible for holding the data that is contained in the individual
+Quad.
 
-How this index applies to geo spatial is when divide a 2 dimensional space in four equal partitions we get something
-like this:
+Basic like this:
 
 ```
  0 | 1
@@ -16,15 +17,16 @@ like this:
  2 | 3
  ```
 
-Each node in the quad tree is then responsible for holding the data that is contained in the individual Quad.   There
-are several design choices the developer has at this point.   The developer can push down data down to the smallest quad
-defined by the tree or they can rebalance as data is inserted.
+One of the design choices the developer has is how the data maintained in the index.   The developer can push down data
+down to the smallest quad defined by the tree or they can rebalanced as data is inserted.
 
 Here is another image that shows how a quad tree can sub divide a map:
 
  ![Example of a mecator map](/images/ExampleQuadTree.png)
 
-An item to note in the above map that the spaces do not have to be square they just need to be uniform.
+An item to note in the above map that the quads do not have to be square they just need to be uniform.
+
+From a performance perspective a Quad Tree is a O(log n) data structure like all other Tree data structures.
 
 ### Some Technical Information
 
@@ -45,7 +47,10 @@ application a breeze.
 The Quad Tree Implementation details in this project
 1. Geometries that wrap the poles (-90/90) and the -180/180 lines are not handled correctly.   This was done to simplify
 the code.   If this is a concern then we can just split the data in the index and insert multiple geometries.
-2. To make remove fast there is an extra data structure to facilitate a quick remove by key.
+2. To make remove fast there is an extra data structure to facilitate a quick remove by key.   This fast remove feature
+would make this implementation removal O(1) and add the overhead of O(1) for insert since it uses a Map data structure.
+    * Note this project uses the eclipse collections project to manage the space concerns.
+    * https://www.eclipse.org/collections/
 3. Utilizes a Reentrant Read Write Lock to allow thread safe read and write operations.
 
 ### Project Break Down
@@ -87,14 +92,14 @@ please let me know.
 
 ### How to scale the grid:
 
-In a Geode typical deployment architecture there is a concept called a locator.   A locator has the responsibility of
-allowing clients and servers to discover each other.   In the demo code we have the server start the locator process
-this is only recommended in a development deployment.   In a production there should be several locators running in
-their own process space.
+Geode's typical deployment architecture there is a concept called a locator.   A locator has the responsibility of
+allowing clients and servers to discover each other to simplify dynamic scaling.   In the demo code we have the server
+start the locator process this is only done to simplify development.   In a production it is better to separate concerns
+and run locators in their own process space.
 
 To scale we just need to start a couple of locators, the right number depends on the HA requirements of the deployment.
-How to launch the data grid servers all we have to do is point them at the locator address by adding in a property
-called `demo.locators` and specify the list of locators.
+How to launch the data grid servers all we have to do is point them at the list of locator address by adding in a
+property called `demo.locators` and specify the list of locators.
 
 Example: add in `-Ddemo.locators=locator1.address[10331],locator2.address[10332]`
 
@@ -107,8 +112,10 @@ Add in the following spring option `-Dspring.profiles.active=prod`
 
 Start the locators on multiple hosts:
 ```
-gfsh>start locator --name=locator1 --dir=one --mcast-port=0 --locators=hosta[10334],hostb[10334] --port=10334
-gfsh>start locator --name=locator2 --dir=two --mcast-port=0 --locators=hosta[10334],hostb[10334] --port=10334
+On host A:
+  gfsh>start locator --name=locator1 --dir=one --mcast-port=0 --locators=hosta[10334],hostb[10334] --port=10334
+On Host B:
+  gfsh>start locator --name=locator2 --dir=two --mcast-port=0 --locators=hosta[10334],hostb[10334] --port=10334
 ```
 
 **NOTE**: The JVM for the locator does not need much heap space.   A common setting is 1G - please iterate what works
@@ -121,7 +128,10 @@ java -Dspring.profiles.active=prod -Ddemo.locators=hosta[10334],hostb[10334] -ja
 ```
 
 **NOTE:** The Grid servers are normally storing data so we normally set the heaps to be large enough to satisfy the
-storage of the data, indexes and run any application code.
+storage of the data, indexes and run any application code. One item to think about when scoping heap space is how big the object
+pointers are.   If we maintain less then 32GB heaps we can use java compressed oops (`XX:+UseCompressedOops`).   If we
+we need to use heap sizes larger then 32GB think about using more then 48-64GB to overcome the impact of the larger
+object pointers.
 
 **NOTE:** The locators strings are the same (``locators=hosta[10334],hostb[10334]``).
 
@@ -141,25 +151,26 @@ and only use the `CMSInitiatingOccupancyFraction`.
 
 Just about every application is different with respect to how it uses the young generation space.   So it is common to
 tune the young generation space.
-* **-Xmn=2g** - Another place to look at when tunning the system this is something to review the GC logs and see how the
+* **-Xmn=2g** - Another place to look at when tuning the system this is something to review the GC logs and see how the
 application is using memory and tune respectively.
 
 When reviewing GC issues here is something to cut and past to help working with GC tuning:
-* export logtime=\`date +%Y%m%d%H%M%S\`
-* -Xloggc:gc${logtime}.log
-* -XX:+PrintGC
-* -XX:+PrintGCDetails
+* **export logtime=\`date +%Y%m%d%H%M%S\`** - Grab a date so we can have a history of GC logs based on application start time.
+* **-Xloggc:gc${logtime}.log** - Name the log file with the current date.
+* **-XX:+PrintGCDetails** - Turn on detailed GC logging.
+* **-XX:+PrintGCDateStamps** - Turn on dates for GC detail logging.
 
 Then use something GCViewer to see how the memory is doing:
     https://github.com/chewiebug/GCViewer
 
 Sometimes it is good to review the total time the application stops.   That option can be turned on via:
 * **-XX:+PrintGCApplicationStoppedTime** – this will actually report pause time for all safepoints (GC related or not).
+
 Unfortunately output from this option lacks timestamps, but it is still useful to narrow down problem to safepoints.
 
 If you are working with larger heaps here is an option to try out:
 * **-XX:+UnlockDiagnosticVMOptions**
-* **-XX:ParGCCardsPerStrideChunk=32768**
+* **-XX:ParGCCardsPerStrideChunk=32768** - The default is 256 and could be to small for large heaps.
 
  In one case ParGCCardsPerStrideChunk option reduced the duration of minor GC by more than 60% in tests with 32G and 96G
  heaps:
