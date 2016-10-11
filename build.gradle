@@ -152,6 +152,9 @@ project(':demo:geode-geospatial-sim') {
         testCompile("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
         compile("org.springframework.boot:spring-boot-configuration-processor:$springBootVersion")
     }
+    bootRun {
+        systemProperties = System.properties
+    }
 }
 project(':demo:geode-geospatial-web') {
     description = 'This is where the web app goes'

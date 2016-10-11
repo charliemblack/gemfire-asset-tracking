@@ -28,6 +28,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Required;
 
 import java.util.Comparator;
+import java.util.Date;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.PriorityBlockingQueue;
 
@@ -117,6 +118,9 @@ public class ActorController implements Runnable, InitializingBean, BeanNameAwar
                 e.printStackTrace();
             }
             addActorToQueue(priorityQueue, i);
+            if(i %1000 == 0){
+                logger.info("Injected {} drivers @ {}", i, new Date());
+            }
         }
     }
 
