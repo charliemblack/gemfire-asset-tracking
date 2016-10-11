@@ -27,6 +27,7 @@
             background-color: rgba(255, 255, 255, 0.4);
             border-color: rgba(100, 150, 0, 1);
         }
+
         html, body, #map {
             margin: 0;
             width: 100%;
@@ -48,18 +49,46 @@
 </body>
 <script>
 
-    var vectorSource = new ol.source.Vector({
+    var source = new ol.source.Vector({});
+
+    var clusterSource = new ol.source.Cluster({
+        distance: 40,
+        source: source
     });
-    var style = new ol.style.Style({
-        image: new ol.style.Circle({
-            radius: 5,
-            fill: new ol.style.Fill({color: 'black'}),
-            stroke: new ol.style.Stroke({color: 'orange', width: 2})
-        })
-    });
-    var vectorLayer = new ol.layer.Vector({
-        source: vectorSource,
-        style: style
+
+    var styleCache = {};
+    var clusters = new ol.layer.Vector({
+        source: clusterSource,
+        style: function (feature) {
+            var size = 1;
+            if (!feature.get('features') != null) {
+                size = feature.get('features').length;
+            }
+            var style = styleCache[size];
+            if (!style) {
+                var radius = 10;
+                if (size > 500) {
+                    radius = 20
+                } else if (size <= 500 && size > 100) {
+                    radius = 16;
+                } else if (size <= 100 && size > 50) {
+                    radius = 13;
+                }
+                style = [new ol.style.Style({
+                    image: new ol.style.Circle({
+                        radius: radius,
+                        stroke: new ol.style.Stroke({color: 'orange', width: 2}),
+                        fill: new ol.style.Fill({color: 'black'})
+                    }),
+                    text: new ol.style.Text({
+                        text: size.toString(),
+                        fill: new ol.style.Fill({color: 'orange'})
+                    })
+                })];
+                styleCache[size] = style;
+            }
+            return style;
+        }
     });
 
     var map = new ol.Map({
@@ -67,9 +96,9 @@
             new ol.layer.Tile({
                 source: new ol.source.OSM()
             }),
-            vectorLayer
+            clusters
         ],
-        renderer: 'webgl',
+        renderer: 'canvas',
         target: 'map',
         view: new ol.View({
             center: [0, 0],
@@ -79,19 +108,24 @@
 
     // a DragBox interaction used to select features by drawing boxes
     var dragBox = new ol.interaction.DragBox({
-        condition: ol.events.condition.platformModifierKeyOnly
+        condition: ol.events.condition.platformModifierKeyOnly,
+        style: new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: [0, 0, 255, 1]
+            })
+        })
     });
     map.addInteraction(dragBox);
 
     //I like having the map resume where I left it...
-    if(localStorage.center){
+    if (localStorage.center) {
         map.getView().setCenter(JSON.parse(localStorage.center));
     }
-    if(localStorage.resolution){
+    if (localStorage.resolution) {
         map.getView().setResolution(JSON.parse(localStorage.resolution));
     }
 
-    map.getView().on('propertychange', function(e) {
+    map.getView().on('propertychange', function (e) {
         switch (e.key) {
             case 'center':
                 localStorage.center = JSON.stringify(map.getView().getCenter());
@@ -126,21 +160,17 @@
         $.ajax(settings).done(function (response) {
             var responseLength = response.length;
             var allFeatures = [];
-            var mapProjection =  map.getView().getProjection();
-            for(var i = 0; i < responseLength; i++){
+            var mapProjection = map.getView().getProjection();
+            for (var i = 0; i < responseLength; i++) {
                 var currItem = response[i];
                 var curr = new ol.Feature({
-                    geometry: new ol.geom.Point(ol.proj.transform([currItem.lng, currItem.lat],  'EPSG:4326', mapProjection)),
+                    geometry: new ol.geom.Point(ol.proj.transform([currItem.lng, currItem.lat], 'EPSG:4326', mapProjection)),
                     id: currItem.uid
                 });
                 allFeatures.push(curr);
             }
-            var newSource = new ol.source.Vector({
-                features: allFeatures
-            });
-            vectorLayer.setSource(newSource);
-            vectorSource.clear();
-            vectorSource = newSource;
+            source.clear(true);
+            source.addFeatures(allFeatures);
         });
     });
 </script>
