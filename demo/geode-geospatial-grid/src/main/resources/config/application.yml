@@ -7,7 +7,7 @@ spring:
   name: development
 
 demo:
-  startLocator: 10334
+  startLocator: localhost[10334]
   locators: localhost[10334]
   jmx-manager: true
   jmx-manager-start: true
@@ -18,7 +18,7 @@ spring:
  name: production
 
 demo:
-  startLocator:
+  startLocator: localhost[10334]
   locators: localhost[10334]
   jmx-manager: false
   jmx-manager-start: false
@@ -29,5 +29,5 @@ spring:
   name: unit test name
 
 demo:
-  startLocator: 10334
+  startLocator: localhost[10334]
   locators: localhost[10334]

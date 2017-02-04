@@ -16,11 +16,11 @@
 
 package org.apache.geode.geospatial.domain;
 
-import com.gemstone.gemfire.pdx.PdxInstance;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.apache.geode.geospatial.service.GeodeGeometryFactory;
+import org.apache.geode.pdx.PdxInstance;
 import org.springframework.beans.factory.annotation.Required;
 
 import static org.apache.geode.geospatial.domain.LocationEvent.LAT;

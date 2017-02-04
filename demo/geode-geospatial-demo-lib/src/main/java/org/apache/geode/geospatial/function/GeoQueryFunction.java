@@ -16,16 +16,16 @@
 
 package org.apache.geode.geospatial.function;
 
-import com.gemstone.gemfire.cache.Region;
-import com.gemstone.gemfire.cache.client.ClientCacheFactory;
-import com.gemstone.gemfire.cache.client.Pool;
-import com.gemstone.gemfire.cache.execute.*;
-import com.gemstone.gemfire.pdx.PdxInstance;
 import com.google.common.collect.Lists;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.WKTReader;
+import org.apache.geode.cache.Region;
+import org.apache.geode.cache.client.ClientCacheFactory;
+import org.apache.geode.cache.client.Pool;
+import org.apache.geode.cache.execute.*;
 import org.apache.geode.geospatial.domain.LocationEvent;
 import org.apache.geode.geospatial.index.GeospaitalIndex;
+import org.apache.geode.pdx.PdxInstance;
 import org.springframework.beans.factory.annotation.Required;
 
 import java.util.ArrayList;

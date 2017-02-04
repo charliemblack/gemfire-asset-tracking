@@ -17,16 +17,15 @@
 ext {
     version = '1.0.0.SNAPSHOT'
     assertjVersion = '2.4.1'
-    geodeVersion = '1.0.0-incubating.M3'
+    geodeVersion = '1.0.0-incubating'
     googleGuavaVersion = '19.0'
     junitVersion = '4.12'
     slf4jVersion = '1.7.21'
-    springBootVersion = '1.4.1.RELEASE'
-    springCoreVersion = '4.3.1.RELEASE'
-    springDataGeodeVersion = '1.0.0.APACHE-GEODE-INCUBATING-M3-SNAPSHOT'
-    springDataGemFireVersion = '1.9.0.BUILD-SNAPSHOT'
+    springBootVersion = '1.5.1.RELEASE'
+    springCoreVersion = '4.3.6.RELEASE'
+    springDataGeodeVersion = '1.0.0.INCUBATING-RELEASE'
     springShellVersion = '1.1.0.RELEASE'
-    jettyVersion = '9.3.6.v20151106'
+    jettyVersion = '9.4.1.v20170120'
     jtsVersion = '1.13'
     eclipseCollectionsVersion = '7.1.0'
     geoToolsVersion = '14.3'
@@ -40,10 +39,10 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:1.4.1.RELEASE"
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:1.5.1.RELEASE"
     }
 }
-description = 'Geode Geospatial Indexd'
+description = 'Geode Geospatial Index'
 
 
 
@@ -69,7 +68,7 @@ subprojects {
     }
     dependencies {
         compile "org.apache.geode:geode-core:$geodeVersion"
-        compile "org.apache.geode:gfsh-dependencies:$geodeVersion"
+        //compile "org.apache.geode:gfsh-dependencies:$geodeVersion"
         compile "org.slf4j:slf4j-api:$slf4jVersion"
         compile "org.apache.logging.log4j:log4j-api:$log4jVersion"
         compile "org.apache.logging.log4j:log4j-core:$log4jVersion"

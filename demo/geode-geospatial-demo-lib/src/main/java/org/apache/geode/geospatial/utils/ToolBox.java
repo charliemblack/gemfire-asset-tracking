@@ -16,8 +16,8 @@
 
 package org.apache.geode.geospatial.utils;
 
-import com.gemstone.gemfire.cache.client.ClientCacheFactory;
-import com.gemstone.gemfire.internal.admin.remote.DistributionLocatorId;
+import org.apache.geode.cache.client.ClientCacheFactory;
+import org.apache.geode.internal.admin.remote.DistributionLocatorId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;

@@ -16,13 +16,13 @@
 
 package org.apache.geode.geospatial.grid;
 
-import com.gemstone.gemfire.cache.Region;
-import com.gemstone.gemfire.cache.partition.PartitionListenerAdapter;
-import com.gemstone.gemfire.cache.partition.PartitionRegionHelper;
-import com.gemstone.gemfire.internal.cache.BucketRegion;
-import com.gemstone.gemfire.internal.cache.PartitionedRegion;
-import com.gemstone.gemfire.internal.cache.partitioned.Bucket;
+import org.apache.geode.cache.Region;
+import org.apache.geode.cache.partition.PartitionListenerAdapter;
+import org.apache.geode.cache.partition.PartitionRegionHelper;
 import org.apache.geode.geospatial.index.GeospaitalIndex;
+import org.apache.geode.internal.cache.BucketRegion;
+import org.apache.geode.internal.cache.PartitionedRegion;
+import org.apache.geode.internal.cache.partitioned.Bucket;
 import org.springframework.beans.factory.annotation.Required;
 
 import java.util.Iterator;

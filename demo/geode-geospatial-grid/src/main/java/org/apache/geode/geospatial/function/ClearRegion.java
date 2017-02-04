@@ -16,12 +16,12 @@
 
 package org.apache.geode.geospatial.function;
 
-import com.gemstone.gemfire.cache.CacheFactory;
-import com.gemstone.gemfire.cache.Region;
-import com.gemstone.gemfire.cache.execute.Function;
-import com.gemstone.gemfire.cache.execute.FunctionContext;
-import com.gemstone.gemfire.cache.partition.PartitionRegionHelper;
 import com.google.common.collect.Lists;
+import org.apache.geode.cache.CacheFactory;
+import org.apache.geode.cache.Region;
+import org.apache.geode.cache.execute.Function;
+import org.apache.geode.cache.execute.FunctionContext;
+import org.apache.geode.cache.partition.PartitionRegionHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;

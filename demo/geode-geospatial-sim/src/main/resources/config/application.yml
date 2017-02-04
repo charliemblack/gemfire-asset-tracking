@@ -6,8 +6,8 @@ spring:
   profiles: dev
   name: development
 
-numberOfActors: 20000
-numberOfSimulators: 6
+numberOfActors: 100000
+numberOfSimulators: 10
 newActorTimeout: 1
 
 demo:
