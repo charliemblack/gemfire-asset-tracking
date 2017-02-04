@@ -6,11 +6,11 @@ The indexing technique that is used in this project is a Quad Tree.  A Quad Tree
 
 Basic conceptual view looks like this:
 
-
- > 0 | 1
- > --|--
- > **2** | **3**
-
+```
+  0 | 1
+  --|--
+  2 | 3
+```
 
 One of the design choices the developer has is how the data maintained in the index.   The developer can push down data down to the smallest quad defined by the tree or they can rebalanced as data is inserted.
 
