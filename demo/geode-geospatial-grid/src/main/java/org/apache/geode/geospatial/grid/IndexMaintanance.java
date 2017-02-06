@@ -18,39 +18,73 @@ package org.apache.geode.geospatial.grid;
 
 import org.apache.geode.cache.CacheWriterException;
 import org.apache.geode.cache.EntryEvent;
+import org.apache.geode.cache.Operation;
+import org.apache.geode.cache.asyncqueue.AsyncEvent;
+import org.apache.geode.cache.asyncqueue.AsyncEventListener;
 import org.apache.geode.cache.util.CacheWriterAdapter;
 import org.apache.geode.geospatial.index.GeospaitalIndex;
 import org.springframework.beans.factory.annotation.Required;
 
+import java.util.List;
+
 /**
  * With partitioned regions only the primary data node will fire events.
  *
- * We are using a cache writer to make sure we are processing the events in order.
+ * We are using a AsyncEventListener to make sure we are processing the events in order.
  * Created by Charlie Black on 6/23/16.
  */
-public class IndexMaintanance extends CacheWriterAdapter {
+public class IndexMaintanance implements AsyncEventListener {
 
     private GeospaitalIndex geospaitalIndex;
-
-    @Override
-    public void beforeCreate(EntryEvent event) throws CacheWriterException {
-        geospaitalIndex.upsert(event.getKey(), event.getNewValue());
-    }
-
-    @Override
-    public void beforeDestroy(EntryEvent event) throws CacheWriterException {
-        geospaitalIndex.remove(event.getKey());
-
-    }
-
-    @Override
-    public void beforeUpdate(EntryEvent event) throws CacheWriterException {
-        geospaitalIndex.upsert(event.getKey(), event.getNewValue());
-    }
 
     @Required
     public void setGeospaitalIndex(GeospaitalIndex geospaitalIndex) {
         this.geospaitalIndex = geospaitalIndex;
     }
 
+    /**
+     * Process the list of <code>AsyncEvent</code>s. This method will
+     * asynchronously be called when events are queued to be processed.
+     * The size of the list will be up to batch size events where batch
+     * size is defined in the <code>AsyncEventQueueFactory</code>.
+     *
+     * @param events The list of <code>AsyncEvent</code> to process
+     * @return boolean    True represents whether the events were successfully processed,
+     * false otherwise.
+     */
+    @Override
+    public boolean processEvents(List<AsyncEvent> events) {
+        for(AsyncEvent curr: events){
+            Operation operation = curr.getOperation();
+            if(operation.isDestroy()){
+                geospaitalIndex.remove(curr.getKey());
+            } else  if(operation.isCreate() || operation.isUpdate()){
+                geospaitalIndex.upsert(curr.getKey(),curr.getDeserializedValue());
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Called when the region containing this callback is closed or destroyed, when
+     * the cache is closed, or when a callback is removed from a region
+     * using an <code>AttributesMutator</code>.
+     * <p>
+     * <p>Implementations should cleanup any external
+     * resources such as database connections. Any runtime exceptions this method
+     * throws will be logged.
+     * <p>
+     * <p>It is possible for this method to be called multiple times on a single
+     * callback instance, so implementations must be tolerant of this.
+     *
+     * @see Cache#close()
+     * @see Region#close
+     * @see Region#localDestroyRegion()
+     * @see Region#destroyRegion()
+     * @see AttributesMutator
+     */
+    @Override
+    public void close() {
+
+    }
 }

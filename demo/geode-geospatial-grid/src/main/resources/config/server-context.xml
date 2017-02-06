@@ -63,11 +63,23 @@
                eviction-heap-percentage="70" properties-ref="gemfireProperties"/>
     <gfe:partitioned-region id="geoSpatialRegion"
                             data-policy="PERSISTENT_PARTITION">
-        <gfe:cache-writer>
-            <bean class="org.apache.geode.geospatial.grid.IndexMaintanance">
-                <property name="geospaitalIndex" ref="geospaitalIndex"/>
-            </bean>
-        </gfe:cache-writer>
+        <gfe:async-event-queue batch-conflation-enabled="true"
+                               batch-size="10"
+                               batch-time-interval="10"
+                               order-policy="KEY"
+                               dispatcher-threads="1">
+            <!--
+                NOTE: I over configured the queue as to open a discussion on what can be done with an async queue.
+
+                Above equals : "dispatcher-threads" queues that are partitioned on key.   Each queue will fire when
+                they have "batch-size" elements or "batch-time-interval" ms whichever comes first.
+            -->
+            <gfe:async-event-listener>
+                <bean class="org.apache.geode.geospatial.grid.IndexMaintanance">
+                    <property name="geospaitalIndex" ref="geospaitalIndex"/>
+                </bean>
+            </gfe:async-event-listener>
+        </gfe:async-event-queue>
         <gfe:partition-listener>
             <bean class="org.apache.geode.geospatial.grid.IndexHAMaintenance">
                 <property name="geospaitalIndex" ref="geospaitalIndex"/>

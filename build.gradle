@@ -58,7 +58,6 @@ subprojects {
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
     repositories {
-        maven { url "file:${rootDir}/localMavenRepo" }
         maven { url 'http://download.osgeo.org/webdav/geotools' }
         maven { url 'https://repo.spring.io/libs-release' }
         maven { url 'https://repo.spring.io/libs-milestone' }
@@ -68,7 +67,6 @@ subprojects {
     }
     dependencies {
         compile "org.apache.geode:geode-core:$geodeVersion"
-        //compile "org.apache.geode:gfsh-dependencies:$geodeVersion"
         compile "org.slf4j:slf4j-api:$slf4jVersion"
         compile "org.apache.logging.log4j:log4j-api:$log4jVersion"
         compile "org.apache.logging.log4j:log4j-core:$log4jVersion"

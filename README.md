@@ -27,12 +27,12 @@ From a performance perspective a Quad Tree is a O(log n) data structure like all
 In this example we will be using some features of Geode:
 
 1. **PartitionListener** – The partition listener is make sure the index is HA.   When there is a failure detected the PartitionListener will create the index on the primary node(s).
-2. **CacheWriter** – As data is being inserted and removed from the system we have to update the index.
+2. **AsyncEventListener** – As data is being inserted and removed from the system we have to update the index.   We are using a AsyncEventListener to assure the index is in order.
 3. **Functions** - The indexes are maintained on the servers so we want to query the servers for the data that matches the search.
 
 In this project I have also made heavy use of Spring eco system.
 
-1. **Spring Data Geode** - Spring Data Geode is part of the Spring Data project.   I use this project configure Geode and use dependency injection to wire up the project.   I used spring xml DSL to configure the project because I wanted all the config in one place - just personal preference to help someone with learning.
+1. **Spring Data Geode** - Spring Data Geode is part of the Spring Data project.   I use this project configure Geode and use dependency injection to wire up the project.   I used spring xml DSL to configure the project because I wanted all the config in one place - just personal preference.
 2. **Spring Boot** - A great way to package up your java application in a single jar.   It make management of java application a breeze.
 
 The Quad Tree Implementation details in this project

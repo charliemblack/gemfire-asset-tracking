@@ -32,11 +32,11 @@ import java.io.IOException;
  */
 @SpringBootApplication
 @ImportResource("classpath:/config/client-context.xml")
-public class SpringBootClientApplication {
+public class GeospatialSimulator {
 
     public static void main(String[] args) throws ParserConfigurationException, SAXException, IOException {
 
-        new SpringApplicationBuilder(SpringBootClientApplication.class)
+        new SpringApplicationBuilder(GeospatialSimulator.class)
                 .web(false)
                 .run();
     }
