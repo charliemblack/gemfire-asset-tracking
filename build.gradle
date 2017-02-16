@@ -17,7 +17,7 @@
 ext {
     version = '1.0.0.SNAPSHOT'
     assertjVersion = '2.4.1'
-    geodeVersion = '1.0.0-incubating'
+    geodeVersion = '1.1.0'
     googleGuavaVersion = '19.0'
     junitVersion = '4.12'
     slf4jVersion = '1.7.21'
@@ -67,6 +67,8 @@ subprojects {
     }
     dependencies {
         compile "org.apache.geode:geode-core:$geodeVersion"
+        compile "org.apache.geode:geode-cq:$geodeVersion"
+        compile "org.apache.geode:geode-wan:$geodeVersion"
         compile "org.slf4j:slf4j-api:$slf4jVersion"
         compile "org.apache.logging.log4j:log4j-api:$log4jVersion"
         compile "org.apache.logging.log4j:log4j-core:$log4jVersion"
