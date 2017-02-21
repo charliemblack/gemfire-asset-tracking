@@ -21,7 +21,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.geode.geospatial.index.BasicQuadTreeImpl;
-import org.apache.geode.geospatial.index.GeospaitalIndex;
+import org.apache.geode.geospatial.index.GeospatialIndex;
 import org.apache.geode.geospatial.service.GeodeGeometryFactory;
 import org.geotools.kml.KMLConfiguration;
 import org.geotools.referencing.CRS;
@@ -47,7 +47,7 @@ import static org.springframework.util.Assert.notNull;
  */
 public class Roads {
     private static final int CIRCLE_APPROXIMATION = 32;
-    private GeospaitalIndex<Integer, Geometry> geospaitalIndex = new BasicQuadTreeImpl();
+    private GeospatialIndex<Integer, Geometry> geospatialIndex = new BasicQuadTreeImpl();
     private Map<Integer, Geometry> multimap = new HashMap<>();
     private GeometryFactory geometryFactory = new GeometryFactory();
     private Random random = new Random(System.currentTimeMillis());
@@ -55,7 +55,7 @@ public class Roads {
 
     public Roads(GeometryFactory geometryFactory) {
         this.geometryFactory = geometryFactory;
-        geospaitalIndex.setGeodeGeometryFactory(new GeodeGeometryFactory<Geometry>() {
+        geospatialIndex.setGeodeGeometryFactory(new GeodeGeometryFactory<Geometry>() {
 
             @Override
             public void setGeometryFactory(GeometryFactory geometryFactory) {
@@ -79,7 +79,7 @@ public class Roads {
     public Coordinate[] getNextRoad(Coordinate coordinate) {
 
         Coordinate[] result = null;
-        Collection<Integer> coordinates = geospaitalIndex.query(calculatePolygon(coordinate, 5 * Actor.METERS_IN_MILE));
+        Collection<Integer> coordinates = geospatialIndex.query(calculatePolygon(coordinate, 5 * Actor.METERS_IN_MILE));
         if (coordinates != null && coordinates.size() > 0) {
             Integer[] array = coordinates.toArray(new Integer[coordinates.size()]);
             int index = random.nextInt(array.length);
@@ -145,7 +145,7 @@ public class Roads {
         for (Geometry geometry : roadGeometries) {
             int road = count.incrementAndGet();
             multimap.put(road, geometry);
-            geospaitalIndex.upsert(road, geometry);
+            geospatialIndex.upsert(road, geometry);
         }
     }
 

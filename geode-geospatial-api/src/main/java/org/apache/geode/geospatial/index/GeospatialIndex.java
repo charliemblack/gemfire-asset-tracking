@@ -26,7 +26,7 @@ import java.util.Collection;
  *
  * Created by Charlie Black on 7/1/16.
  */
-public interface GeospaitalIndex<K, V> {
+public interface GeospatialIndex<K, V> {
     /**
      * Remove a key from the index.
      *

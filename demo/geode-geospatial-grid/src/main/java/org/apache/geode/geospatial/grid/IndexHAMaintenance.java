@@ -19,7 +19,7 @@ package org.apache.geode.geospatial.grid;
 import org.apache.geode.cache.Region;
 import org.apache.geode.cache.partition.PartitionListenerAdapter;
 import org.apache.geode.cache.partition.PartitionRegionHelper;
-import org.apache.geode.geospatial.index.GeospaitalIndex;
+import org.apache.geode.geospatial.index.GeospatialIndex;
 import org.apache.geode.internal.cache.BucketRegion;
 import org.apache.geode.internal.cache.PartitionedRegion;
 import org.apache.geode.internal.cache.partitioned.Bucket;
@@ -40,19 +40,19 @@ import java.util.Set;
  * Created by Charlie Black on 6/23/16.
  */
 public class IndexHAMaintenance extends PartitionListenerAdapter {
-    private GeospaitalIndex geospaitalIndex;
+    private GeospatialIndex geospatialIndex;
     private PartitionedRegion region;
 
     @Required
-    public void setGeospaitalIndex(GeospaitalIndex geospaitalIndex) {
-        this.geospaitalIndex = geospaitalIndex;
+    public void setGeospatialIndex(GeospatialIndex geospatialIndex) {
+        this.geospatialIndex = geospatialIndex;
     }
 
 
     @Override
     public void afterBucketRemoved(int bucketId, Iterable<?> keys) {
         Iterator<?> it = keys.iterator();
-        it.forEachRemaining(key -> geospaitalIndex.remove(key));
+        it.forEachRemaining(key -> geospatialIndex.remove(key));
     }
 
     @Override
@@ -61,7 +61,7 @@ public class IndexHAMaintenance extends PartitionListenerAdapter {
             Bucket b = region.getRegionAdvisor().getBucket(bucketId);
             BucketRegion bucketRegion = b.getBucketAdvisor().getProxyBucketRegion().getHostedBucketRegion();
             Set<Map.Entry> entries = bucketRegion.entrySet();
-            entries.forEach(curr -> geospaitalIndex.upsert(curr.getKey(), curr.getValue()));
+            entries.forEach(curr -> geospatialIndex.upsert(curr.getKey(), curr.getValue()));
         }
     }
 
@@ -70,10 +70,10 @@ public class IndexHAMaintenance extends PartitionListenerAdapter {
         region = (PartitionedRegion) reg;
 
         // We are going to re-index all of the primary data so clear out anything we might have and re-index.
-        geospaitalIndex.clear();
+        geospatialIndex.clear();
         Region localPrimaryData = PartitionRegionHelper.getLocalPrimaryData(region);
         Set<Map.Entry> entries = localPrimaryData.entrySet();
-        entries.forEach(curr -> geospaitalIndex.upsert(curr.getKey(), curr.getValue()));
+        entries.forEach(curr -> geospatialIndex.upsert(curr.getKey(), curr.getValue()));
     }
 
 }

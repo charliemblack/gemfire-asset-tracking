@@ -16,13 +16,10 @@
 
 package org.apache.geode.geospatial.grid;
 
-import org.apache.geode.cache.CacheWriterException;
-import org.apache.geode.cache.EntryEvent;
 import org.apache.geode.cache.Operation;
 import org.apache.geode.cache.asyncqueue.AsyncEvent;
 import org.apache.geode.cache.asyncqueue.AsyncEventListener;
-import org.apache.geode.cache.util.CacheWriterAdapter;
-import org.apache.geode.geospatial.index.GeospaitalIndex;
+import org.apache.geode.geospatial.index.GeospatialIndex;
 import org.springframework.beans.factory.annotation.Required;
 
 import java.util.List;
@@ -35,11 +32,11 @@ import java.util.List;
  */
 public class IndexMaintanance implements AsyncEventListener {
 
-    private GeospaitalIndex geospaitalIndex;
+    private GeospatialIndex geospatialIndex;
 
     @Required
-    public void setGeospaitalIndex(GeospaitalIndex geospaitalIndex) {
-        this.geospaitalIndex = geospaitalIndex;
+    public void setGeospatialIndex(GeospatialIndex geospatialIndex) {
+        this.geospatialIndex = geospatialIndex;
     }
 
     /**
@@ -57,9 +54,9 @@ public class IndexMaintanance implements AsyncEventListener {
         for(AsyncEvent curr: events){
             Operation operation = curr.getOperation();
             if(operation.isDestroy()){
-                geospaitalIndex.remove(curr.getKey());
+                geospatialIndex.remove(curr.getKey());
             } else  if(operation.isCreate() || operation.isUpdate()){
-                geospaitalIndex.upsert(curr.getKey(),curr.getDeserializedValue());
+                geospatialIndex.upsert(curr.getKey(),curr.getDeserializedValue());
             }
         }
         return true;

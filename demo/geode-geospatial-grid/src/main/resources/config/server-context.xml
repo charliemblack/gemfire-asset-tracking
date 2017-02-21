@@ -49,7 +49,7 @@
         </property>
     </bean>
 
-    <bean id="geospaitalIndex" class="org.apache.geode.geospatial.index.BasicQuadTreeImpl">
+    <bean id="geospatialIndex" class="org.apache.geode.geospatial.index.BasicQuadTreeImpl">
         <property name="geodeGeometryFactory" ref="geodeGeometryFactory"/>
     </bean>
 
@@ -76,20 +76,20 @@
             -->
             <gfe:async-event-listener>
                 <bean class="org.apache.geode.geospatial.grid.IndexMaintanance">
-                    <property name="geospaitalIndex" ref="geospaitalIndex"/>
+                    <property name="geospatialIndex" ref="geospatialIndex"/>
                 </bean>
             </gfe:async-event-listener>
         </gfe:async-event-queue>
         <gfe:partition-listener>
             <bean class="org.apache.geode.geospatial.grid.IndexHAMaintenance">
-                <property name="geospaitalIndex" ref="geospaitalIndex"/>
+                <property name="geospatialIndex" ref="geospatialIndex"/>
             </bean>
         </gfe:partition-listener>
     </gfe:partitioned-region>
     <gfe:function-service>
         <gfe:function>
             <bean class="org.apache.geode.geospatial.function.GeoQueryFunction">
-                <property name="geospaitalIndex" ref="geospaitalIndex"/>
+                <property name="geospatialIndex" ref="geospatialIndex"/>
                 <property name="chunkSize" value="1000"/>
                 <property name="region" ref="geoSpatialRegion"/>
             </bean>

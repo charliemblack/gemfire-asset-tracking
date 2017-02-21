@@ -24,7 +24,7 @@ import org.apache.geode.cache.client.ClientCacheFactory;
 import org.apache.geode.cache.client.Pool;
 import org.apache.geode.cache.execute.*;
 import org.apache.geode.geospatial.domain.LocationEvent;
-import org.apache.geode.geospatial.index.GeospaitalIndex;
+import org.apache.geode.geospatial.index.GeospatialIndex;
 import org.apache.geode.pdx.PdxInstance;
 import org.springframework.beans.factory.annotation.Required;
 
@@ -41,7 +41,7 @@ public class GeoQueryFunction implements Function {
     public static final String ID = "geoQueryFunction";
 
     private int chunkSize = 1000;
-    private GeospaitalIndex<Object, LocationEvent> geospaitalIndex;
+    private GeospatialIndex<Object, LocationEvent> geospatialIndex;
     private Region<Object, PdxInstance> region;
 
     @Required
@@ -50,8 +50,8 @@ public class GeoQueryFunction implements Function {
     }
 
     @Required
-    public void setGeospaitalIndex(GeospaitalIndex<Object, LocationEvent> geospaitalIndex) {
-        this.geospaitalIndex = geospaitalIndex;
+    public void setGeospatialIndex(GeospatialIndex<Object, LocationEvent> geospatialIndex) {
+        this.geospatialIndex = geospatialIndex;
     }
 
     @Required
@@ -68,7 +68,7 @@ public class GeoQueryFunction implements Function {
             //Create a JTS object that we can test against.
             Geometry geometry = new WKTReader().read(wellKownText);
 
-            ArrayList<Object> keys = new ArrayList<Object>(geospaitalIndex.query(geometry));
+            ArrayList<Object> keys = new ArrayList<Object>(geospatialIndex.query(geometry));
 
             List<List<Object>> partitionedKeys = Lists.partition(keys, chunkSize);
             for (List currKeySet : partitionedKeys) {

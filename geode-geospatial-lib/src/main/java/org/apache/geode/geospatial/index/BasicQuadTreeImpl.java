@@ -42,7 +42,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * Created by Charlie Black on 6/23/16.
  */
-public class BasicQuadTreeImpl implements GeospaitalIndex {
+public class BasicQuadTreeImpl implements GeospatialIndex {
 
     private final ReentrantReadWriteLock reentrantReadWriteLock = new ReentrantReadWriteLock();
     private final Lock readLock = reentrantReadWriteLock.readLock();
