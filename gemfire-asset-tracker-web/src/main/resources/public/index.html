@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<!--
+  ~ Copyright [2016] Charlie Black
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<html>
+<head>
+    <title>Geode Geo Spatial</title>
+    <link rel="stylesheet" href="js/ol-v3.18.2-dist/ol.css" type="text/css">
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="js/ol-v3.18.2-dist/ol.js"></script>
+    <script src="js/jquery-3.1.1.min.js"></script>
+    <style>
+        .ol-dragbox {
+            background-color: rgba(255, 255, 255, 0.4);
+            border-color: rgba(100, 150, 0, 1);
+        }
+
+        html, body, #map {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #text {
+            position: absolute;
+            bottom: 1em;
+            left: 1em;
+            width: 512px;
+            z-index: 20000;
+            background-color: white;
+            padding: 0 0.5em 0.5em 0.5em;
+        }
+    </style>
+</head>
+<body>
+<div id="map" class="map"></div>
+</body>
+<script>
+
+    var source = new ol.source.Vector({});
+
+    var clusterSource = new ol.source.Cluster({
+        distance: 40,
+        source: source
+    });
+
+    var styleCache = {};
+    var clusters = new ol.layer.Vector({
+        source: clusterSource,
+        style: function (feature) {
+            var size = 1;
+            if (!feature.get('features') != null) {
+                size = feature.get('features').length;
+            }
+            var style = styleCache[size];
+            if (!style) {
+                var radius = 10;
+                if (size > 500) {
+                    radius = 20
+                } else if (size <= 500 && size > 100) {
+                    radius = 16;
+                } else if (size <= 100 && size > 50) {
+                    radius = 13;
+                }
+                style = [new ol.style.Style({
+                    image: new ol.style.Circle({
+                        radius: radius,
+                        stroke: new ol.style.Stroke({color: 'orange', width: 2}),
+                        fill: new ol.style.Fill({color: 'black'})
+                    }),
+                    text: new ol.style.Text({
+                        text: size.toString(),
+                        fill: new ol.style.Fill({color: 'orange'})
+                    })
+                })];
+                styleCache[size] = style;
+            }
+            return style;
+        }
+    });
+
+    var map = new ol.Map({
+        layers: [
+            new ol.layer.Tile({
+                source: new ol.source.OSM()
+            }),
+            clusters
+        ],
+        renderer: 'canvas',
+        target: 'map',
+        view: new ol.View({
+            center: [0, 0],
+            zoom: 2
+        })
+    });
+
+    // a DragBox interaction used to select features by drawing boxes
+    var dragBox = new ol.interaction.DragBox({
+        condition: ol.events.condition.platformModifierKeyOnly,
+        style: new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: [0, 0, 255, 1]
+            })
+        })
+    });
+    map.addInteraction(dragBox);
+
+    //I like having the map resume where I left it...
+    if (localStorage.center) {
+        map.getView().setCenter(JSON.parse(localStorage.center));
+    }
+    if (localStorage.resolution) {
+        map.getView().setResolution(JSON.parse(localStorage.resolution));
+    }
+
+    map.getView().on('propertychange', function (e) {
+        switch (e.key) {
+            case 'center':
+                localStorage.center = JSON.stringify(map.getView().getCenter());
+                break;
+            case 'resolution':
+                localStorage.resolution = JSON.stringify(map.getView().getResolution());
+        }
+    });
+
+    dragBox.on('boxend', function () {
+        // features that intersect the box are added to the collection of
+        // selected features, and their names are displayed in the "info"
+        // div
+        var info = [];
+        var extent = dragBox.getGeometry().getExtent();
+        var bottomLeft = ol.proj.transform([extent[0], extent[1]], map.getView().getProjection(), 'EPSG:4326');
+        var topRight = ol.proj.transform([extent[2], extent[3]], map.getView().getProjection(), 'EPSG:4326');
+
+        var settings = {
+            "async": true,
+            "url": "query?minLng=" + bottomLeft[0] + "&minLat=" + bottomLeft[1] + "&maxLng=" + topRight[0] + "&maxLat=" + topRight[1],
+            "method": "GET",
+            "headers": {
+                "cache-control": "no-cache",
+            }
+        };
+        $.ajax(settings).done(function (response) {
+            var responseLength = response.length;
+            var allFeatures = [];
+            var mapProjection = map.getView().getProjection();
+            for (var i = 0; i < responseLength; i++) {
+                var currItem = response[i];
+                var curr = new ol.Feature({
+                    geometry: new ol.geom.Point(ol.proj.transform([currItem.lng, currItem.lat], 'EPSG:4326', mapProjection)),
+                    id: currItem.uid
+                });
+                allFeatures.push(curr);
+            }
+            source.clear(true);
+            source.addFeatures(allFeatures);
+        });
+    });
+</script>
+
+</html>

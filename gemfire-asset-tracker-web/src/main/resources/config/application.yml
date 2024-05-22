@@ -1,0 +1,33 @@
+spring:
+  profiles:
+    active: dev
+
+---
+spring:
+  config:
+    activate:
+      on-profile:  dev
+  name: development
+
+demo:
+  locators: localhost[10334]
+
+---
+spring:
+  config:
+    activate:
+      on-profile:  prod
+  name: production
+
+demo:
+  locators: localhost[10334]
+
+---
+spring:
+  config:
+    activate:
+      on-profile:  unit-test
+  name: unit test name
+
+demo:
+  locators: localhost[10334]

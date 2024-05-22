@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-rootProject.name='geode-geospatial-index'
-include 'geode-geospatial-api','geode-geospatial-lib','demo:geode-geospatial-demo-lib', 'demo:geode-geospatial-grid','demo:geode-geospatial-sim','demo:geode-geospatial-web'
+rootProject.name='gemfire-geospatial-index'
+include 'gemfire-asset-tracker-lib','gemfire-asset-tracker-sim','gemfire-asset-tracker-web'
