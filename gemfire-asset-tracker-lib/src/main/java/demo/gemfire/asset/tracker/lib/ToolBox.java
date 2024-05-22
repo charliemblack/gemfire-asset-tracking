@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package org.apache.geode.geospatial.client;
+package demo.gemfire.asset.tracker.lib;
 
+import org.apache.geode.cache.client.ClientCacheFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -23,34 +24,34 @@ import org.springframework.util.StringUtils;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.ServiceLoader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Charlie Black on 7/26/16.
  */
 public class ToolBox {
+
     private static final Logger logger = LoggerFactory.getLogger(ToolBox.class);
 
     private ToolBox() {
     }
 
-   /* public static void configureDefaultClientPool(ClientCacheFactory clientCacheFactory, String locators) {
-        StringTokenizer stringTokenizer = new StringTokenizer(locators, ",");
-        clientCacheFactory.setPoolMaxConnections(-1);
-        clientCacheFactory.setPoolPRSingleHopEnabled(true);
+   public static void configureDefaultClientPool(ClientCacheFactory clientCacheFactory, String locators) {
+       System.out.println("locators = " + locators);
 
-        while (stringTokenizer.hasMoreTokens()) {
-            String curr = stringTokenizer.nextToken();
-            DistributionLocatorId locatorId = new DistributionLocatorId(curr);
-            String addr = locatorId.getBindAddress();
-            if (addr != null && addr.trim().length() > 0) {
-                clientCacheFactory.addPoolLocator(addr, locatorId.getPort());
-            } else {
-                clientCacheFactory.addPoolLocator(locatorId.getHost().getHostName(), locatorId.getPort());
-            }
-        }
-        clientCacheFactory.create();
+       String regex = "([a-zA-Z0-9.-]+)\\[(\\d+)\\]";
+
+       Pattern pattern = Pattern.compile(regex);
+       Matcher matcher = pattern.matcher(locators);
+
+       while (matcher.find()) {
+           String hostname = matcher.group(1);
+           String port = matcher.group(2);
+           System.out.println("Hostname: " + hostname + ", Port: " + port);
+           clientCacheFactory.addPoolLocator(hostname, Integer.parseInt(port));
+       }
     }
-*/
     public static <T> T getService(Class clazz) {
         ServiceLoader<T> loader = ServiceLoader.load(clazz);
 

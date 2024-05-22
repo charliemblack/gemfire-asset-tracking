@@ -14,58 +14,56 @@
  * limitations under the License.
  */
 
-package org.apache.geode.geospatial.web;
+package demo.gemfire.asset.tracker.web;
 
+import demo.gemfire.asset.tracker.lib.LocationEvent;
+import demo.gemfire.asset.tracker.lib.SpaitalHelper;
+import demo.gemfire.asset.tracker.lib.ToolBox;
 import org.apache.geode.cache.client.ClientCache;
 import org.apache.geode.cache.client.ClientCacheFactory;
+import org.apache.geode.cache.client.ClientRegionShortcut;
 import org.apache.geode.cache.lucene.LuceneQuery;
 import org.apache.geode.cache.lucene.LuceneQueryException;
 import org.apache.geode.cache.lucene.LuceneService;
 import org.apache.geode.cache.lucene.LuceneServiceProvider;
-import org.apache.geode.geospatial.domain.LocationEvent;
-import org.apache.geode.geospatial.domain.SpaitalHelper;
-import org.apache.geode.pdx.PdxInstance;
-import org.apache.lucene.search.Query;
 import org.locationtech.jts.io.ParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-
-import static org.apache.geode.geospatial.domain.SpaitalHelper.findLocationThatIsInsideTheRectangle;
 
 /**
  * Created by Charlie Black on 9/23/16.
  */
 @RestController
-public class GeoQuery implements InitializingBean {
-    private static final Logger logger = LoggerFactory.getLogger(GeoQuery.class);
+@SpringBootApplication
+public class GeospatialWebServer implements InitializingBean {
+
 
     @Value("${demo.locators}")
     private String locators;
 
     private ClientCache clientCache;
-
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        ClientCacheFactory clientCacheFactory = new ClientCacheFactory();
+        ToolBox.configureDefaultClientPool(clientCacheFactory, locators);
+        clientCache = clientCacheFactory.create();
+        clientCache.createClientRegionFactory(ClientRegionShortcut.PROXY).create("geoSpatialRegion");
+    }
     @RequestMapping(value = "/query", method = RequestMethod.GET, produces = "application/json")
     public Collection<LocationEvent> query(double minLng, double minLat, double maxLng, double maxLat) throws ParseException, LuceneQueryException {
         LuceneService luceneService = LuceneServiceProvider.get(clientCache);
         LuceneQuery<String, LocationEvent> luceneQuery = SpaitalHelper.findInRectangle("simpleIndex", "geoSpatialRegion", minLng, minLat, maxLng, maxLat, luceneService);
         return luceneQuery.findValues();
     }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        System.out.println("locators = " + locators);
-        clientCache = new ClientCacheFactory()
-                .addPoolLocator("localhost", 10334)
-                .create();
+    public static void main(String[] args) {
+        SpringApplication.run(GeospatialWebServer.class, args);
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.apache.geode.geospatial.client;
+package demo.gemfire.asset.tracker.simulator;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.geotools.kml.KMLConfiguration;
@@ -44,7 +44,7 @@ import static org.springframework.util.Assert.notNull;
  */
 public class Roads {
     private static final int CIRCLE_APPROXIMATION = 32;
-    private GeospatialIndex<Integer, Geometry> geospatialIndex = new BasicQuadTreeImpl();
+    private BasicQuadTreeImpl geospatialIndex = new BasicQuadTreeImpl();
     private Map<Integer, Geometry> multimap = new HashMap<>();
     private GeometryFactory geometryFactory = new GeometryFactory();
     private Random random = new Random(System.currentTimeMillis());
@@ -52,18 +52,11 @@ public class Roads {
 
     public Roads(GeometryFactory geometryFactory) {
         this.geometryFactory = geometryFactory;
-        geospatialIndex.setGeodeGeometryFactory(new GeodeGeometryFactory<Geometry>() {
-
-            @Override
-            public void setGeometryFactory(GeometryFactory geometryFactory) {
-
-            }
-
-            @Override
-            public Geometry getGeometry(Geometry value) {
-                return geometryFactory.createPoint(value.getCoordinate());
-            }
-        });
+        geospatialIndex.setGeometryFactory(geometryFactory);
+    }
+    public Roads(GeometryFactory geometryFactory, String roadFileName) throws IOException, ParserConfigurationException, SAXException {
+        this(geometryFactory);
+        setRoads(roadFileName);
     }
 
     /**

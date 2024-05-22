@@ -9,12 +9,12 @@ spring:
       on-profile: dev
   name: development
 
-numberOfActors: 100000
-numberOfSimulators: 10
-newActorTimeout: 1
-
 demo:
-  locators: localhost[10334]
+  GeospatialSimulator:
+    locators: localhost[10334]
+    numberOfActors: 100000
+    numberOfSimulators: 10
+    newActorTimeout: 1
 
 ---
 spring:
@@ -23,11 +23,13 @@ spring:
       on-profile: prod
   name: production
 
-numberOfActors: 1000000
-numberOfSimulators: 16
+
 
 demo:
-  locators: localhost[10334]
+  GeospatialSimulator:
+    locators: localhost[10334]
+    numberOfActors: 1000000
+    numberOfSimulators: 16
 
 ---
 spring:
@@ -37,4 +39,5 @@ spring:
   name: unit test name
 
 demo:
-  locators: localhost[10334]
+  GeospatialSimulator:
+    locators: localhost[10334]

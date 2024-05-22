@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package org.apache.geode.geospatial.client;
+package demo.gemfire.asset.tracker.simulator;
 
 import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.index.ItemVisitor;
 
 import java.util.Collection;
@@ -40,31 +41,29 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * Created by Charlie Black on 6/23/16.
  */
-public class BasicQuadTreeImpl implements GeospatialIndex {
+public class BasicQuadTreeImpl  {
 
     private final ReentrantReadWriteLock reentrantReadWriteLock = new ReentrantReadWriteLock();
     private final Lock readLock = reentrantReadWriteLock.readLock();
     private final Lock writeLock = reentrantReadWriteLock.writeLock();
 
-    private UnifiedMap<Object, Map<Object, Geometry>> quickRemove = new UnifiedMap<>();
+    private UnifiedMap<Integer, Map<Integer, Geometry>> quickRemove = new UnifiedMap<>();
     //16 levels is ~611 meters - (circumference of the earth in meters) / 2^16
     //Don't forget that we don't have to index the world.
     private byte maxDepth = 16;
     private Quad top = new Quad(new Envelope(-180, 180, -90, 90), maxDepth);
-    private GeodeGeometryFactory<Object> geometryFactory;
+    private GeometryFactory geometryFactory = new GeometryFactory();
 
-    @Override
-    public void setGeodeGeometryFactory(GeodeGeometryFactory geodeGeometryFactory) {
-        this.geometryFactory = geodeGeometryFactory;
+    public void setGeometryFactory(GeometryFactory eometryFactory) {
+        this.geometryFactory = geometryFactory;
     }
 
 
-    @Override
-    public void remove(Object key) {
+    public void remove(Integer key) {
         if (key != null) {
             writeLock.lock();
             try {
-                Map<Object, Geometry> container = quickRemove.remove(key);
+                Map<Integer, Geometry> container = quickRemove.remove(key);
                 if (container != null) {
                     container.remove(key);
                 }
@@ -74,9 +73,8 @@ public class BasicQuadTreeImpl implements GeospatialIndex {
         }
     }
 
-    @Override
-    public void upsert(Object key, Object value) {
-        Geometry geometry = geometryFactory.getGeometry(value);
+    public void upsert(Integer key, Geometry value) {
+        Geometry geometry = geometryFactory.createPoint(value.getCoordinate());
         writeLock.lock();
         try {
             remove(key);
@@ -86,7 +84,6 @@ public class BasicQuadTreeImpl implements GeospatialIndex {
         }
     }
 
-    @Override
     public Collection query(Geometry geometry) {
         readLock.lock();
         try {
@@ -99,7 +96,7 @@ public class BasicQuadTreeImpl implements GeospatialIndex {
     }
 
 
-    public Set keySet() {
+    public Set<Integer> keySet() {
         readLock.lock();
         try {
             return new HashSet<>(quickRemove.keySet());
@@ -124,19 +121,19 @@ public class BasicQuadTreeImpl implements GeospatialIndex {
         private byte quadTreeDepth;
         private Envelope levelEnvelope;
         private final Quad[] quads = new Quad[4];
-        private UnifiedMap<Object, Geometry> items;
+        private UnifiedMap<Integer, Geometry> items;
 
         public Quad(Envelope currSector, byte level) {
             this.quadTreeDepth = level;
             levelEnvelope = currSector;
         }
 
-        boolean insert(Object key, Geometry geometry) {
+        boolean insert(Integer key, Geometry geometry) {
             return insert(key, geometry.getEnvelopeInternal(), geometry);
         }
 
         //recursively add it to the tree
-        boolean insert(Object key, Envelope envelope, Geometry geometry) {
+        boolean insert(Integer key, Envelope envelope, Geometry geometry) {
             boolean found = false;
             if (quadTreeDepth >= 0) {
                 for (int i = 3; i >= 0; i--) {
@@ -151,7 +148,7 @@ public class BasicQuadTreeImpl implements GeospatialIndex {
             }
             //We either hit bottom or we have and envelope that doesn't fit any lower.
             if (!found && levelEnvelope.contains(envelope)) {
-                UnifiedMap<Object, Geometry> items = safeGetItems();
+                UnifiedMap<Integer, Geometry> items = safeGetItems();
                 items.put(key, geometry);
                 quickRemove.put(key, items);
                 found = true;
@@ -160,7 +157,7 @@ public class BasicQuadTreeImpl implements GeospatialIndex {
         }
 
         //Lazy make the storage of items.
-        private UnifiedMap<Object, Geometry> safeGetItems() {
+        private UnifiedMap<Integer, Geometry> safeGetItems() {
             if (items == null) {
                 items = new UnifiedMap<>();
             }

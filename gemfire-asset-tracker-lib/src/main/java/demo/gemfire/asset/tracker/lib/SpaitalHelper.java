@@ -1,4 +1,4 @@
-package org.apache.geode.geospatial.domain;
+package demo.gemfire.asset.tracker.lib;
 
 import static org.locationtech.spatial4j.distance.DistanceUtils.EARTH_MEAN_RADIUS_MI;
 

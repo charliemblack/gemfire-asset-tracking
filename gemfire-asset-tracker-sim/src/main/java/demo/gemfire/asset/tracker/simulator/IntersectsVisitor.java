@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.apache.geode.geospatial.client;
+package demo.gemfire.asset.tracker.simulator;
 
 import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 import org.locationtech.jts.geom.Geometry;

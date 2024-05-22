@@ -1,9 +1,8 @@
-package org.apache.geode.geospatial.domain;
+package demo.gemfire.asset.tracker.lib;
 
 import java.util.Collection;
 import java.util.Collections;
 
-import org.apache.geode.pdx.PdxInstance;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.TextField;

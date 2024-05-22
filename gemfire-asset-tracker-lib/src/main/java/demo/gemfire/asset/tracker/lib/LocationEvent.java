@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.apache.geode.geospatial.domain;
+package demo.gemfire.asset.tracker.lib;
 
 
 import org.apache.geode.DataSerializable;

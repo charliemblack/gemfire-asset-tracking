@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.apache.geode.geospatial.client;
+package demo.gemfire.asset.tracker.simulator;
 
 import net.sf.geographiclib.Geodesic;
 import net.sf.geographiclib.GeodesicData;
