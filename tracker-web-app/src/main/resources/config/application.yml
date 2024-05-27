@@ -10,7 +10,8 @@ spring:
   name: development
 
 demo:
-  locators: localhost[10334]
+  GeospatialWebServer:
+    locators: localhost[10334]
 
 ---
 spring:
@@ -20,7 +21,8 @@ spring:
   name: production
 
 demo:
-  locators: localhost[10334]
+  GeospatialWebServer:
+    locators: localhost[10334]
 
 ---
 spring:
@@ -30,4 +32,5 @@ spring:
   name: unit test name
 
 demo:
-  locators: localhost[10334]
+  GeospatialWebServer:
+    locators: localhost[10334]

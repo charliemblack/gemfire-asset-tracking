@@ -15,4 +15,13 @@
  */
 
 rootProject.name='gemfire-geospatial-index'
-include 'gemfire-asset-tracker-lib','gemfire-asset-tracker-sim','gemfire-asset-tracker-web'
+include 'tracker-lib','tracker-simulator','tracker-web-app'
+
+// Disable building the root project
+gradle.rootProject {
+    it.tasks.matching { task ->
+        task.name == 'build'
+    }.all { task ->
+        task.enabled = false
+    }
+}

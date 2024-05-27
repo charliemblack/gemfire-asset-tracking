@@ -46,7 +46,7 @@ import java.util.Collection;
 public class GeospatialWebServer implements InitializingBean {
 
 
-    @Value("${demo.locators}")
+    @Value("${demo.GeospatialWebServer.locators:localhost[10334]}")
     private String locators;
 
     private ClientCache clientCache;

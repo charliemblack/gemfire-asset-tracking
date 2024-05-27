@@ -68,17 +68,17 @@ subprojects {
     }
 }
 
-project(':gemfire-asset-tracker-lib') {
+project(':tracker-lib') {
     dependencies {
         implementation "org.springframework:spring-context:${springCoreVersion}"
     }
 }
 
-project(':gemfire-asset-tracker-sim') {
+project(':tracker-simulator') {
     apply plugin: 'org.springframework.boot'
 
     dependencies {
-        implementation project(':gemfire-asset-tracker-lib')
+        implementation project(':tracker-lib')
         implementation 'org.springframework.boot:spring-boot-starter'
         implementation "com.vmware.gemfire:gemfire-core:${gemfireVersion}"
         implementation "org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}"
@@ -92,11 +92,11 @@ project(':gemfire-asset-tracker-sim') {
     }
 }
 
-project(':gemfire-asset-tracker-web') {
+project(':tracker-web-app') {
     apply plugin: 'org.springframework.boot'
 
     dependencies {
-        implementation project(':gemfire-asset-tracker-lib')
+        implementation project(':tracker-lib')
         implementation "com.fasterxml.jackson.core:jackson-core:2.17.1"
         implementation "com.fasterxml.jackson.core:jackson-databind:2.17.1"
         implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
