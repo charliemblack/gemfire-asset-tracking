@@ -9,7 +9,13 @@ The project consists of three parts:
 
 The focus of this project is on showcasing GemFire application development rather than creating a complex application. However, it can easily be extended to correlate tracking information with "beacon" information, providing a 360-degree view of the beacon.
 
-This 360-degree profile enrichment is achieved using "cache listeners," "async event listeners," or "cache writer." The key is to stage the data with the identifier for the beacon, enabling in-memory performance with high throughput. GemFire supports this by co-locating regions, so beacons operate on the servers holding the data.
+This 360-degree profile enrichment is accomplished using "cache listeners," "async event listeners," or "cache writer." The key is to stage the data with the identifier for the beacon, allowing for high throughput with in-memory performance. GemFire enhances this by co-locating regions, ensuring beacons operate on the servers holding the data.
+
+The choice of technique depends on the use case:
+
+* **CacheListener** - Synchronous, triggered after the data has been persisted in the context of a "put".
+* **CacheWriter** - Synchronous, triggered before the data has been persisted in the context of a "put".  A CacheWriter can also prohibit a data item from being actually stored.  This could be treated as a data validation.
+* **AsyncCacheListener** - Asynchronous, triggered after the data has been stored and operates outside the context of a "put".
 
 ## How to Use
 
