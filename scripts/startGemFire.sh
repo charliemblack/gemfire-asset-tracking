@@ -47,6 +47,6 @@ gfsh --e "start server  ${SERVER_OPTS} --name=server2 --dir=${APP_HOME}/data/ser
 
 wait
 
-gfsh --e "connect" -e "create region --name=test --type=PARTITION_REDUNDANT_PERSISTENT"
+gfsh -e "connect " -e "deploy --jar ${APP_HOME}/tracker-lib/build/libs/tracker-lib.jar" -e "create lucene index --name=simpleIndex --region=geoSpatialRegion --field=uid --serializer=demo.gemfire.asset.tracker.lib.LocationInfoSerializer" -e "create region --name=geoSpatialRegion --type=PARTITION_REDUNDANT"
 
 
