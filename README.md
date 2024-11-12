@@ -19,6 +19,10 @@ The choice of technique depends on the use case:
 
 ## How to Use
 
+### Requirements
+
+Make sure to set up the environment to use JDK17 or later.
+
 ### Install GemFire and GemFire Search
 
 Follow these steps to install GemFire and GemFire Search:
